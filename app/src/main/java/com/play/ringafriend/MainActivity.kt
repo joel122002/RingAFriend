@@ -1,6 +1,8 @@
 package com.play.ringafriend
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +39,8 @@ import com.play.ringafriend.ui.theme.RingAFriendTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +77,21 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        val TAG = "FIREISCOOL"
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            Log.d(TAG, token)
+            Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
+        })
     }
 }
 
