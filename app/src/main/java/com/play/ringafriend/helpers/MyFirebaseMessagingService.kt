@@ -1,4 +1,4 @@
-package com.play.ringafriend
+package com.play.ringafriend.helpers
 
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
