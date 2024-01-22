@@ -1,0 +1,109 @@
+package com.play.ringafriend
+
+import android.app.KeyguardManager
+import android.content.Context
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.os.Build
+import android.os.Bundle
+import android.util.Log
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.play.ringafriend.ui.theme.RingAFriendTheme
+import kotlin.properties.Delegates
+
+val TAG = "FIREISCOOL"
+class RingerActivity : ComponentActivity() {
+    var currentAudioVolume: Int by Delegates.notNull<Int>()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Open Activity even if screen locked
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+            keyguardManager.requestDismissKeyguard(this, null)
+        } else {
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+        }
+        setContent {
+            var mediaPlayer = MediaPlayer.create(applicationContext, R.raw.alarm)
+            mediaPlayer.start()
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            currentAudioVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+            Log.d(TAG, "Vol is " + audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
+            audioManager.setStreamVolume(
+                AudioManager.STREAM_MUSIC,
+                audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                0
+            )
+            RingAFriendTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    IconButton(onClick = {
+                        mediaPlayer.stop()
+                        mediaPlayer.reset()
+                        mediaPlayer.release()
+                        audioManager.setStreamVolume(
+                            AudioManager.STREAM_MUSIC,
+                            currentAudioVolume,
+                            0
+                        )
+                        finish()
+                    }) {
+                        Icon(Icons.Filled.Close, contentDescription = "Dismiss")
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        Log.d(TAG, currentAudioVolume.toString())
+        if (currentAudioVolume >= 0){
+            audioManager.setStreamVolume(
+                AudioManager.STREAM_MUSIC,
+                currentAudioVolume,
+                0
+            )
+        }
+    }
+
+}
+
+@Composable
+fun Greeting2(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hello $name!",
+        modifier = modifier
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview2() {
+    RingAFriendTheme {
+        Greeting2("Android")
+    }
+}
