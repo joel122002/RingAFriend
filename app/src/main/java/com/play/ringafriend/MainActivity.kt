@@ -13,7 +13,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,18 +34,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.play.ringafriend.ui.theme.RingAFriendTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.setValue
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
+import com.play.ringafriend.ui.theme.RingAFriendTheme
+
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -70,8 +69,25 @@ class MainActivity : ComponentActivity() {
             startForResult.launch(intent)
         }
         setContent {
-            var presses by remember { mutableIntStateOf(0) }
+            var presses by remember { mutableIntStateOf(1) }
+            var displayToken by remember { mutableStateOf("") }
             val favourites = remember { mutableStateListOf<Int>()}
+
+            val TAG = "FIREISCOOL"
+            FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                    return@OnCompleteListener
+                }
+
+                // Get new FCM registration token
+                val token = task.result
+                displayToken = token
+
+                Log.d(TAG, token)
+                Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
+            })
+
             RingAFriendTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -92,7 +108,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .size(width = 240.dp, height = 100.dp)
                                 ) {
-                                    Text(text = "You have pressed the floating action button $presses times.")
+                                    Text(text = "You have pressed the floating action button $presses times. $displayToken")
                                 }
                             }
                         }
@@ -101,20 +117,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val TAG = "FIREISCOOL"
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
-
-            // Get new FCM registration token
-            val token = task.result
-
-            Log.d(TAG, token)
-            Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
-        })
     }
 }
 
