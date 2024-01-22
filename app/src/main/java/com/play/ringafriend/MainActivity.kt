@@ -2,6 +2,7 @@ package com.play.ringafriend
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -41,11 +42,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.play.ringafriend.ui.theme.RingAFriendTheme
+import java.net.URLEncoder
 
 
 class MainActivity : ComponentActivity() {
@@ -69,7 +72,7 @@ class MainActivity : ComponentActivity() {
             startForResult.launch(intent)
         }
         setContent {
-            var presses by remember { mutableIntStateOf(1) }
+            var presses by remember { mutableIntStateOf(0) }
             var displayToken by remember { mutableStateOf("") }
             val favourites = remember { mutableStateListOf<Int>()}
 
@@ -94,7 +97,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    SmallTopAppBarExample(presses = presses, setPresses = {presses = it}) {innerPadding ->
+                    SmallTopAppBarExample(displayToken = displayToken, presses = presses, setPresses = {presses = it}) {innerPadding ->
                         LazyColumn(
                             modifier = Modifier
                                 .padding(innerPadding),
@@ -138,8 +141,8 @@ fun GreetingPreview() {
 
 @ExperimentalMaterial3Api
 @Composable
-fun SmallTopAppBarExample(presses: Int, setPresses: (Int) -> Unit, content: @Composable() (PaddingValues) -> Unit) {
-
+fun SmallTopAppBarExample(displayToken: String, presses: Int, setPresses: (Int) -> Unit, content: @Composable() (PaddingValues) -> Unit) {
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -161,7 +164,24 @@ fun SmallTopAppBarExample(presses: Int, setPresses: (Int) -> Unit, content: @Com
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { setPresses(presses+1)}) {
+            FloatingActionButton(onClick = {
+                Log.d(TAG, "Clicked")
+                val packageManager: PackageManager = context.getPackageManager()
+                val i = Intent(Intent.ACTION_VIEW)
+                try {
+                    val url =
+                        "https://api.whatsapp.com/send?phone=+11234567890" + "&text=" + URLEncoder.encode(
+                            displayToken,
+                            "UTF-8"
+                        )
+                    Log.d(TAG, "Parsed")
+                    i.setPackage("com.whatsapp")
+                    i.setData(Uri.parse(url))
+                    context.startActivity(i);
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }) {
                 Icon(Icons.Outlined.Send, contentDescription = "Send key")
             }
         }
