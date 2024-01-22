@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -162,7 +162,7 @@ fun SmallTopAppBarExample(presses: Int, setPresses: (Int) -> Unit, content: @Com
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { setPresses(presses+1)}) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
+                Icon(Icons.Outlined.Send, contentDescription = "Send key")
             }
         }
     ) { innerPadding ->
