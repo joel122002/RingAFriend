@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -70,6 +71,15 @@ class MainActivity : ComponentActivity() {
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:" + packageName))
             startForResult.launch(intent)
+        }
+        // Check for battery optimization and disable it
+        val pm = this.getSystemService(POWER_SERVICE) as PowerManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !pm.isIgnoringBatteryOptimizations(packageName)) {
+            val intent = Intent()
+            val packageName = packageName
+            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            intent.setData(Uri.parse("package:$packageName"))
+            startActivity(intent)
         }
         setContent {
             var presses by remember { mutableIntStateOf(0) }
