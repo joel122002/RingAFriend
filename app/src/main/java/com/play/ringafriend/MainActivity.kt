@@ -44,7 +44,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.tasks.OnCompleteListener
@@ -84,6 +86,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             var displayToken by remember { mutableStateOf("") }
+            val localClipboardManager = LocalClipboardManager.current
 
             val TAG = "FIREISCOOL"
             FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -119,6 +122,9 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     modifier = Modifier
                                         .fillMaxWidth(0.5f),
+                                    onClick = {
+                                        localClipboardManager.setText(AnnotatedString(displayToken))
+                                    }
                                 ) {
                                     Text(text = "Your display token is $displayToken. Click to copy")
                                 }
