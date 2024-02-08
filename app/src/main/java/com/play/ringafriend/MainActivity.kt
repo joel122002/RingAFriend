@@ -180,7 +180,7 @@ fun SmallTopAppBarExample(displayToken: String, presses: Int, setPresses: (Int) 
                 val i = Intent(Intent.ACTION_VIEW)
                 try {
                     val url =
-                        "https://api.whatsapp.com/send?phone=+11234567890" + "&text=" + URLEncoder.encode(
+                        "https://api.whatsapp.com/send?phone="+ BuildConfig.PHONE_NUMBER + "&text=" + URLEncoder.encode(
                             displayToken,
                             "UTF-8"
                         )
