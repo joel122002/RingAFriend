@@ -82,9 +82,7 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
         }
         setContent {
-            var presses by remember { mutableIntStateOf(0) }
             var displayToken by remember { mutableStateOf("") }
-            val favourites = remember { mutableStateListOf<Int>()}
 
             val TAG = "FIREISCOOL"
             FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -107,13 +105,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    SmallTopAppBarExample(displayToken = displayToken, presses = presses, setPresses = {presses = it}) {innerPadding ->
+                    SmallTopAppBarExample(displayToken = displayToken) { innerPadding ->
                         LazyColumn(
                             modifier = Modifier
                                 .padding(innerPadding),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
-                            items(presses){
+                            item {
                                 Card(
                                     colors = CardDefaults.cardColors(
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -121,7 +119,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .size(width = 240.dp, height = 100.dp)
                                 ) {
-                                    Text(text = "You have pressed the floating action button $presses times. $displayToken")
+                                    Text(text = "Your display token is $displayToken. Click to copy")
                                 }
                             }
                         }
@@ -129,7 +127,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
     }
 }
 
@@ -151,7 +148,7 @@ fun GreetingPreview() {
 
 @ExperimentalMaterial3Api
 @Composable
-fun SmallTopAppBarExample(displayToken: String, presses: Int, setPresses: (Int) -> Unit, content: @Composable() (PaddingValues) -> Unit) {
+fun SmallTopAppBarExample(displayToken: String, content: @Composable() (PaddingValues) -> Unit) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
