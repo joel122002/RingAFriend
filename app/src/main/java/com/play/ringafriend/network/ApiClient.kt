@@ -19,6 +19,8 @@ class ApiClient(val context: Context) {
         val okHttpClient = OkHttpClient.Builder()
             .readTimeout(100, TimeUnit.SECONDS)
             .connectTimeout(100, TimeUnit.SECONDS)
+            .addInterceptor(SetCookiesInterceptor(context))
+            .addInterceptor(ReceivedCookiesInterceptor(context))
             .build()
         if (retrofit == null) {
             retrofit = Retrofit.Builder()
