@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -117,7 +118,7 @@ class MainActivity : ComponentActivity() {
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                     ),
                                     modifier = Modifier
-                                        .size(width = 240.dp, height = 100.dp)
+                                        .fillMaxWidth(0.5f),
                                 ) {
                                     Text(text = "Your display token is $displayToken. Click to copy")
                                 }
