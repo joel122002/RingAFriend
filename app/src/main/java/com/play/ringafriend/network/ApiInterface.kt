@@ -11,4 +11,10 @@ import retrofit2.http.POST
 interface ApiInterface {
     @POST("register-device")
     fun registerDevice(@Body registerDevicePostModel: RegisterDevicePostModel): Call<RegisterDevicePostModel>
+
+    @POST("login")
+    fun login(@Body authModel: AuthModel): Call<AuthModel>
+
+    @GET("profile")
+    fun profile(): Call<UserModel>
 }
