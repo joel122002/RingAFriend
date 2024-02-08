@@ -46,13 +46,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
+import com.play.ringafriend.data.RegisterDevicePostModel
 import com.play.ringafriend.ui.theme.RingAFriendTheme
+import com.play.ringafriend.viewmodel.HomeViewModel
 import java.net.URLEncoder
 
 
 class MainActivity : ComponentActivity() {
+    private lateinit var vm: HomeViewModel
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +89,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             var displayToken by remember { mutableStateOf("") }
+            vm = ViewModelProvider(this)[HomeViewModel::class.java]
             val localClipboardManager = LocalClipboardManager.current
 
             val TAG = "FIREISCOOL"
@@ -95,6 +102,16 @@ class MainActivity : ComponentActivity() {
                 // Get new FCM registration token
                 val token = task.result
                 displayToken = token
+                val registerDevicePostModel = RegisterDevicePostModel()
+                registerDevicePostModel.token = displayToken
+                vm.registerDevice(registerDevicePostModel = registerDevicePostModel)
+                vm.registerDeviceLiveData?.observe(this, Observer {
+                    if (it) {
+                        Log.d(TAG, "registered")
+                    } else {
+                        Log.d(TAG, "Registration failed")
+                    }
+                })
 
                 Log.d(TAG, token)
                 Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
