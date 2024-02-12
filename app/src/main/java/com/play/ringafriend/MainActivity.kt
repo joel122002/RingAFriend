@@ -50,7 +50,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
+import com.play.ringafriend.auth.CredentialsActivity
 import com.play.ringafriend.data.RegisterDevicePostModel
+import com.play.ringafriend.helpers.AppState
+import com.play.ringafriend.helpers.AppStateManager
 import com.play.ringafriend.ui.theme.RingAFriendTheme
 import com.play.ringafriend.viewmodel.HomeViewModel
 import java.net.URLEncoder
@@ -58,10 +61,16 @@ import java.net.URLEncoder
 
 class MainActivity : ComponentActivity() {
     private lateinit var vm: HomeViewModel
-
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val appState = AppStateManager.getAppState(applicationContext)
+        if (appState == AppState.LOGGED_OUT) {
+            val intent = Intent(applicationContext, CredentialsActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
         // Handle permission intent
         val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 result: ActivityResult ->
