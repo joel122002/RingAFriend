@@ -72,24 +72,28 @@ class MainActivity : ComponentActivity() {
             return
         }
         // Handle permission intent
-        val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val intent = result.data
-                // Handle the Intent
-                //do stuff here
+        val startForResult =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val intent = result.data
+                    // Handle the Intent
+                    //do stuff here
+                }
             }
-        }
         // Request Draw over other apps permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + packageName))
+                Uri.parse("package:" + packageName)
+            )
             startForResult.launch(intent)
         }
         // Check for battery optimization and disable it
         val pm = this.getSystemService(POWER_SERVICE) as PowerManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !pm.isIgnoringBatteryOptimizations(packageName)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !pm.isIgnoringBatteryOptimizations(
+                packageName
+            )
+        ) {
             val intent = Intent()
             val packageName = packageName
             intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
