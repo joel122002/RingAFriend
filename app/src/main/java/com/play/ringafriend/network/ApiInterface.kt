@@ -15,6 +15,9 @@ interface ApiInterface {
     @POST("login")
     fun login(@Body authModel: AuthModel): Call<AuthModel>
 
+    @POST("signup")
+    fun signup(@Body authModel: AuthModel): Call<AuthModel>
+
     @GET("profile")
     fun profile(): Call<UserModel>
 }

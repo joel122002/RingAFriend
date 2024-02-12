@@ -15,6 +15,7 @@ class HomeViewModel(application: Application): AndroidViewModel(application){
     var registerDeviceLiveData:LiveData<RegisterDevicePostModel>?=null
     var loginLiveData:LiveData<AuthModel>?=null
     var profileLiveData:LiveData<UserModel>?=null
+    var signupLiveData:LiveData<AuthModel>?=null
 
     init {
         homeRepository = HomeRepository(application.applicationContext)
@@ -27,6 +28,10 @@ class HomeViewModel(application: Application): AndroidViewModel(application){
 
     fun login(authModel: AuthModel){
         loginLiveData = homeRepository?.login(authModel)
+    }
+
+    fun signup(authModel: AuthModel){
+        signupLiveData = homeRepository?.signup(authModel)
     }
 
     fun profile(){
