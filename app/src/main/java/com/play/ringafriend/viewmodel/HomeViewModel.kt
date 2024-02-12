@@ -12,7 +12,7 @@ import com.play.ringafriend.data.UserModel
 class HomeViewModel(application: Application): AndroidViewModel(application){
 
     private var homeRepository: HomeRepository?=null
-    var registerDeviceLiveData:LiveData<Boolean>?=null
+    var registerDeviceLiveData:LiveData<RegisterDevicePostModel>?=null
     var loginLiveData:LiveData<Boolean>?=null
     var profileLiveData:LiveData<UserModel>?=null
 

@@ -3,6 +3,7 @@ package com.play.ringafriend.data
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.play.ringafriend.helpers.APIUtils
 import com.play.ringafriend.network.ApiClient
 import com.play.ringafriend.network.ApiInterface
 import retrofit2.Call
@@ -16,18 +17,18 @@ class HomeRepository(context: Context) {
         apiInterface = ApiClient(context).getApiClient().create(ApiInterface::class.java)
     }
 
-    fun registerDevice(registerDevicePostModel: RegisterDevicePostModel): LiveData<Boolean> {
-        val data = MutableLiveData<Boolean>()
+    fun registerDevice(registerDevicePostModel: RegisterDevicePostModel): LiveData<RegisterDevicePostModel> {
+        val data = MutableLiveData<RegisterDevicePostModel>()
 
         apiInterface?.registerDevice(registerDevicePostModel)?.enqueue(object : Callback<RegisterDevicePostModel>{
             override fun onFailure(call: Call<RegisterDevicePostModel>, t: Throwable) {
-                data.value = false
+                data.value = RegisterDevicePostModel(error = "Failed to register")
             }
             override fun onResponse(call: Call<RegisterDevicePostModel>, response: Response<RegisterDevicePostModel>) {
                 if (response.code() == 204){
-                    data.value = true
+                    data.value = registerDevicePostModel
                 }else{
-                    data.value = false
+                    data.value = RegisterDevicePostModel(error = APIUtils.getErrorMessage(response))
                 }
             }
         })

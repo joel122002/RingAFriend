@@ -104,12 +104,13 @@ class MainActivity : ComponentActivity() {
                 displayToken = token
                 val registerDevicePostModel = RegisterDevicePostModel()
                 registerDevicePostModel.token = displayToken
+                registerDevicePostModel.device_name = Build.MANUFACTURER + " " + Build.MODEL
                 vm.registerDevice(registerDevicePostModel = registerDevicePostModel)
                 vm.registerDeviceLiveData?.observe(this, Observer {
-                    if (it) {
+                    if (!it.token.isNullOrEmpty()) {
                         Log.d(TAG, "registered")
-                    } else {
-                        Log.d(TAG, "Registration failed")
+                    } else if(!it.error.isNullOrEmpty()) {
+                        Toast.makeText(baseContext, it.error!!, Toast.LENGTH_SHORT).show()
                     }
                 })
 
