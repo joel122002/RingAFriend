@@ -1,7 +1,8 @@
 package com.play.ringafriend.data
 
 data class AuthModel (
-    var username:String?,
-    var password: String?,
-    var error: String?
+    var email:String?=null,
+    var username:String?=null,
+    var password: String?=null,
+    var error: String?=null
 )
