@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Ring A Friend</string>
     <string name="title_activity_ringer">RingerActivity</string>
+    <string name="title_activity_credentials">CredentialsActivity</string>
 </resources>
