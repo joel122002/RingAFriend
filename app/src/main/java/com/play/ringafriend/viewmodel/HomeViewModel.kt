@@ -13,7 +13,7 @@ class HomeViewModel(application: Application): AndroidViewModel(application){
 
     private var homeRepository: HomeRepository?=null
     var registerDeviceLiveData:LiveData<RegisterDevicePostModel>?=null
-    var loginLiveData:LiveData<Boolean>?=null
+    var loginLiveData:LiveData<AuthModel>?=null
     var profileLiveData:LiveData<UserModel>?=null
 
     init {

@@ -35,18 +35,23 @@ class HomeRepository(context: Context) {
         return data
     }
 
-    fun login(authModel: AuthModel): LiveData<Boolean> {
-        val data = MutableLiveData<Boolean>()
+    fun login(authModel: AuthModel): LiveData<AuthModel> {
+        val data = MutableLiveData<AuthModel>()
 
         apiInterface?.login(authModel)?.enqueue(object : Callback<AuthModel>{
             override fun onFailure(call: Call<AuthModel>, t: Throwable) {
-                data.value = false
+                data.value = AuthModel()
             }
             override fun onResponse(call: Call<AuthModel>, response: Response<AuthModel>) {
                 if (response.code() == 204){
-                    data.value = true
+                    data.value = authModel
                 }else{
-                    data.value = false
+                    data.value = AuthModel(error = APIUtils.getErrorMessage(response))
+                }
+            }
+        })
+        return data
+    }
                 }
             }
         })
