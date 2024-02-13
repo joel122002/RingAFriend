@@ -22,13 +22,17 @@ class HomeRepository(context: Context) {
 
         apiInterface?.registerDevice(registerDevicePostModel)?.enqueue(object : Callback<RegisterDevicePostModel>{
             override fun onFailure(call: Call<RegisterDevicePostModel>, t: Throwable) {
-                data.value = RegisterDevicePostModel(error = "Failed to register")
+                data.value = RegisterDevicePostModel(error = "Request failed")
             }
             override fun onResponse(call: Call<RegisterDevicePostModel>, response: Response<RegisterDevicePostModel>) {
                 if (response.code() == 204){
                     data.value = registerDevicePostModel
-                }else{
-                    data.value = RegisterDevicePostModel(error = APIUtils.getErrorMessage(response))
+                } else {
+                    try {
+                        data.value = RegisterDevicePostModel(error = APIUtils.getErrorMessage(response))
+                    } catch (e: Exception) {
+                        data.value = RegisterDevicePostModel(error = "${response.code()} ${response.message()}")
+                    }
                 }
             }
         })
@@ -40,13 +44,17 @@ class HomeRepository(context: Context) {
 
         apiInterface?.login(authModel)?.enqueue(object : Callback<AuthModel>{
             override fun onFailure(call: Call<AuthModel>, t: Throwable) {
-                data.value = AuthModel()
+                data.value = AuthModel(error = "Request failed")
             }
             override fun onResponse(call: Call<AuthModel>, response: Response<AuthModel>) {
                 if (response.code() == 204){
                     data.value = authModel
                 }else{
-                    data.value = AuthModel(error = APIUtils.getErrorMessage(response))
+                    try {
+                        data.value = AuthModel(error = APIUtils.getErrorMessage(response))
+                    } catch (e: Exception) {
+                        data.value = AuthModel(error = "${response.code()} ${response.message()}")
+                    }
                 }
             }
         })
@@ -58,14 +66,19 @@ class HomeRepository(context: Context) {
 
         apiInterface?.signup(authModel)?.enqueue(object : Callback<AuthModel>{
             override fun onFailure(call: Call<AuthModel>, t: Throwable) {
-                data.value = AuthModel()
+                data.value = AuthModel(error = "Request failed")
             }
             override fun onResponse(call: Call<AuthModel>, response: Response<AuthModel>) {
                 if (response.code() == 204){
                     data.value = authModel
-                }else{
-                    val errorMessage = APIUtils.getErrorMessage(response)
-                    data.value = AuthModel(error = errorMessage)
+                } else if (response.code() == 401) {
+                  data.value = AuthModel(error = "Unauthorized")
+                } else{
+                    try {
+                        data.value = AuthModel(error = APIUtils.getErrorMessage(response))
+                    } catch (e: Exception) {
+                        data.value = AuthModel(error = "${response.code()} ${response.message()}")
+                    }
                 }
             }
         })
@@ -77,16 +90,16 @@ class HomeRepository(context: Context) {
 
         apiInterface?.profile()?.enqueue(object : Callback<UserModel>{
             override fun onFailure(call: Call<UserModel>, t: Throwable) {
-                data.value = null
+                data.value = UserModel(null, null, "Request Failed")
             }
             override fun onResponse(call: Call<UserModel>, response: Response<UserModel>) {
                 val res = response.body()
                 if (response.code() == 200){
                     data.value = res
-                }else if  (response.code() == 401) {
+                } else if  (response.code() == 401) {
                     data.value = UserModel(null, null, "Unauthorized")
                 } else {
-                    data.value = null
+                    data.value = UserModel(null, null, "${response.code()} ${response.message()}")
                 }
             }
         })
