@@ -40,6 +40,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             val intent = Intent(applicationContext, RingerActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
 //            // Check if data needs to be processed by long running job
 //            if (needsToBeScheduled()) {
