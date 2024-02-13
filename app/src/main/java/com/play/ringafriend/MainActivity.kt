@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        vm = ViewModelProvider(this)[HomeViewModel::class.java]
         val appState = AppStateManager.getAppState(applicationContext)
         if (appState == AppState.LOGGED_OUT) {
             val intent = Intent(applicationContext, CredentialsActivity::class.java)
@@ -71,6 +72,7 @@ class MainActivity : ComponentActivity() {
             finish()
             return
         }
+        val applicationContext = applicationContext
         // Handle permission intent
         val startForResult =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
@@ -102,7 +104,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             var displayToken by remember { mutableStateOf("") }
-            vm = ViewModelProvider(this)[HomeViewModel::class.java]
+            var username by remember { mutableStateOf("") }
             val localClipboardManager = LocalClipboardManager.current
 
             val TAG = "FIREISCOOL"
@@ -130,6 +132,32 @@ class MainActivity : ComponentActivity() {
                 Log.d(TAG, token)
                 Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
             })
+            vm.profile()
+            vm.profileLiveData?.observe(this, Observer {
+                if (it != null && !it.username.isNullOrEmpty()) {
+                    username = it.username
+                } else if(it != null && !it.error.isNullOrEmpty()) {
+                    if (it.error == "Unauthorized") {
+                        AppStateManager.setAppState(applicationContext, AppState.LOGGED_OUT)
+                        val intent = Intent(applicationContext, CredentialsActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                    Toast.makeText(baseContext, it.error!!, Toast.LENGTH_SHORT).show()
+                }
+            })
+
+            if (username.isNotEmpty()) {
+                FirebaseMessaging.getInstance().subscribeToTopic(username)
+                    .addOnCompleteListener { task ->
+                        var msg = "Subscribed"
+                        if (!task.isSuccessful) {
+                            msg = "Subscribe failed"
+                        }
+                        Log.d(TAG, msg)
+                        Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                    }
+            }
 
             RingAFriendTheme {
                 // A surface container using the 'background' color from the theme
