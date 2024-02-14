@@ -21,6 +21,7 @@ class ApiClient(val context: Context) {
             .connectTimeout(100, TimeUnit.SECONDS)
             .addInterceptor(SetCookiesInterceptor(context))
             .addInterceptor(ReceivedCookiesInterceptor(context))
+            .addInterceptor(AppVersionInterceptor())
             .build()
         if (retrofit == null) {
             retrofit = Retrofit.Builder()
