@@ -105,4 +105,25 @@ class HomeRepository(context: Context) {
         })
         return data
     }
+
+    fun getAllUsers(): LiveData<List<UserModel>> {
+        var data = MutableLiveData<List<UserModel>>()
+
+        apiInterface?.getAllUsers()?.enqueue(object : Callback<List<UserModel>>{
+            override fun onFailure(call: Call<List<UserModel>>, t: Throwable) {
+                data.value = listOf(UserModel(null, null, "Request failed"))
+            }
+            override fun onResponse(call: Call<List<UserModel>>, response: Response<List<UserModel>>) {
+                val res = response.body()
+                if (response.code() == 200){
+                    data.value = res
+                } else if  (response.code() == 401) {
+                    data.value = listOf(UserModel(null, null, "Unauthorized"))
+                } else {
+                    data.value = listOf(UserModel(null, null, "${response.code()} ${response.message()}"))
+                }
+            }
+        })
+        return data
+    }
 }

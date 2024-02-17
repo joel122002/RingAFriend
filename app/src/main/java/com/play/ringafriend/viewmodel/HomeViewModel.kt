@@ -16,6 +16,7 @@ class HomeViewModel(application: Application): AndroidViewModel(application){
     var loginLiveData:LiveData<AuthModel>?=null
     var profileLiveData:LiveData<UserModel>?=null
     var signupLiveData:LiveData<AuthModel>?=null
+    var getAllUsersLiveData:LiveData<List<UserModel>>?=null
 
     init {
         homeRepository = HomeRepository(application.applicationContext)
@@ -36,5 +37,9 @@ class HomeViewModel(application: Application): AndroidViewModel(application){
 
     fun profile(){
         profileLiveData = homeRepository?.profile()
+    }
+
+    fun getAllUsers(){
+        getAllUsersLiveData = homeRepository?.getAllUsers()
     }
 }

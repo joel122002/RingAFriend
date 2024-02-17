@@ -20,4 +20,7 @@ interface ApiInterface {
 
     @GET("profile")
     fun profile(): Call<UserModel>
+
+    @GET("get-all-users")
+    fun getAllUsers(): Call<List<UserModel>>
 }
