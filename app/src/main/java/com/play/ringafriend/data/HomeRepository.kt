@@ -126,4 +126,29 @@ class HomeRepository(context: Context) {
         })
         return data
     }
+
+    fun sendToUser(username: String): LiveData<String> {
+        var data = MutableLiveData<String>()
+
+        apiInterface?.sendToUser(username)?.enqueue(object : Callback<String>{
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                data.value = "Request failed"
+            }
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                val res = response.body()
+                if (response.code() == 200){
+                    data.value = null
+                } else if  (response.code() == 401) {
+                    data.value = "Unauthorized"
+                } else {
+                    try {
+                        data.value = APIUtils.getErrorMessage(response)
+                    } catch (e: Exception) {
+                        data.value = "${response.code()} ${response.message()}"
+                    }
+                }
+            }
+        })
+        return data
+    }
 }
