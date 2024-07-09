@@ -80,9 +80,13 @@ class RingerActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     IconButton(onClick = {
-                        mediaPlayer.stop()
-                        mediaPlayer.reset()
-                        mediaPlayer.release()
+                        try {
+                            mediaPlayer.stop()
+                            mediaPlayer.reset()
+                            mediaPlayer.release()
+                        } catch (e: Error) {
+                            e.printStackTrace()
+                        }
                         audioManager.setStreamVolume(
                             AudioManager.STREAM_MUSIC,
                             currentAudioVolume,
