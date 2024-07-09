@@ -2,9 +2,19 @@ package com.play.ringafriend.helpers
 
 import android.content.Intent
 import android.util.Log
+import androidx.core.app.ActivityCompat.startActivityForResult
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.play.ringafriend.RingerActivity
+import com.play.ringafriend.network.SocketClient
+import io.socket.client.Ack
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import kotlin.coroutines.coroutineContext
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     // [START on_new_token]
@@ -37,11 +47,20 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // Check if message contains a data payload.
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: ${remoteMessage.data}")
+            val username = remoteMessage.data.get("username")
+            val socket = SocketClient.getClient(applicationContext)
+            socket.connect()
+            socket.emit("join", username, Ack {
+                socket.emit("messageToGroup", JSONObject().put("room", username).put("message", "$username is receiving the call"), Ack {
+                   Log.i(TAG, "Call received")
+                })
+            })
             val intent = Intent(applicationContext, RingerActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("USERNAME", username);
             startActivity(intent)
         }
 

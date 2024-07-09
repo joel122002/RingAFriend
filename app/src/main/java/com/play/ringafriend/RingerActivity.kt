@@ -2,13 +2,10 @@ package com.play.ringafriend
 
 import android.app.KeyguardManager
 import android.content.Context
-import android.content.Intent
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -24,7 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import com.play.ringafriend.network.SocketClient
 import com.play.ringafriend.ui.theme.RingAFriendTheme
+import io.socket.client.Ack
+import org.json.JSONObject
 import kotlin.properties.Delegates
 
 val TAG = "FIREISCOOL"
@@ -47,6 +47,8 @@ class RingerActivity : ComponentActivity() {
                         WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
+        val username = getIntent().getStringExtra("USERNAME");
+        val socket = SocketClient.getClient(applicationContext)
         setContent {
             var mediaPlayer = MediaPlayer.create(applicationContext, R.raw.alarm)
             mediaPlayer.start()
@@ -87,12 +89,18 @@ class RingerActivity : ComponentActivity() {
                         } catch (e: Error) {
                             e.printStackTrace()
                         }
+
                         audioManager.setStreamVolume(
                             AudioManager.STREAM_MUSIC,
                             currentAudioVolume,
                             0
                         )
-                        finish()
+                        socket.emit("completion", JSONObject().put("room", username).put("message", "Call ended"), Ack {
+                            socket.emit("leave", username, Ack {
+                                socket.disconnect()
+                                finish()
+                            })
+                        })
                     }) {
                         Icon(Icons.Filled.Close, contentDescription = "Dismiss")
                     }
