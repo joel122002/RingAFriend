@@ -28,6 +28,10 @@ class HomeRepository(context: Context) {
                 if (response.code() == 204){
                     data.value = registerDevicePostModel
                 } else {
+                    if (response.code() == 400) {
+                        data.value = RegisterDevicePostModel()
+                        return
+                    }
                     try {
                         data.value = RegisterDevicePostModel(error = APIUtils.getErrorMessage(response))
                     } catch (e: Exception) {
@@ -136,7 +140,7 @@ class HomeRepository(context: Context) {
             }
             override fun onResponse(call: Call<String>, response: Response<String>) {
                 val res = response.body()
-                if (response.code() == 200){
+                if (response.code() == 204){
                     data.value = null
                 } else if  (response.code() == 401) {
                     data.value = "Unauthorized"
