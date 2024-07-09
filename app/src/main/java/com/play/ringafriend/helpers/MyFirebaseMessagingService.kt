@@ -43,14 +43,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
-//            // Check if data needs to be processed by long running job
-//            if (needsToBeScheduled()) {
-//                // For long-running tasks (10 seconds or more) use WorkManager.
-//                scheduleJob()
-//            } else {
-//                // Handle message within 10 seconds
-//                handleNow()
-//            }
         }
 
         // Check if message contains a notification payload.
