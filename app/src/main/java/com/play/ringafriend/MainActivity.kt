@@ -227,6 +227,8 @@ fun UserCard(user: UserModel, context: Context, vm: HomeViewModel, socket: Socke
             if (!socket.connected()) {
                 socket.connect()
             }
+            socket.off("completion")
+            socket.off("messageToGroup")
             socket.emit("join", user.username, Ack { args ->
                 Log.i(TAG, "Successfully joined ${user.username}")
             })
