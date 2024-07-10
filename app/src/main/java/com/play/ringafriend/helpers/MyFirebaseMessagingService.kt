@@ -2,19 +2,12 @@ package com.play.ringafriend.helpers
 
 import android.content.Intent
 import android.util.Log
-import androidx.core.app.ActivityCompat.startActivityForResult
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.play.ringafriend.RingerActivity
 import com.play.ringafriend.network.SocketClient
 import io.socket.client.Ack
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.json.JSONObject
-import kotlin.coroutines.coroutineContext
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     // [START on_new_token]
