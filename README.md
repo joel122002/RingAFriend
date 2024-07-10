@@ -10,6 +10,8 @@ You will also have to add [google-services.json](https://developers.google.com/a
 
 Add the following properties to the `local.properties`
 ```bash
-BACKEND_URL="https://server.url/" # Must be https
+BACKEND_URL="https://server.url/some_path" # Must be https
+BACKEND_SOCKET_URL="https://server.url/" # Must be https and must only contain domain (notice how there's no "some_path")
+BACKEND_SOCKET_PATH="/socket.io/" # Path which responds to socket.io requests. By default it is "/socket.io/"
 PHONE_NUMBER="+11234567890" # Must have 
 ```
