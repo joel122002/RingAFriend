@@ -28,6 +28,8 @@ android {
 
         // Set API keys in BuildConfig
         buildConfigField("String", "BACKEND_URL", properties.getProperty("BACKEND_URL"))
+        buildConfigField("String", "BACKEND_SOCKET_URL", properties.getProperty("BACKEND_SOCKET_URL"))
+        buildConfigField("String", "BACKEND_SOCKET_PATH", properties.getProperty("BACKEND_SOCKET_PATH"))
         buildConfigField("String", "PHONE_NUMBER", properties.getProperty("PHONE_NUMBER"))
     }
 
