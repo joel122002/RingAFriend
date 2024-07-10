@@ -45,7 +45,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             socket.connect()
             socket.emit("join", username, Ack {
                 socket.emit(
-                    "messageToGroup",
+                    SocketEvent.MESSAGE_TO_GROUP.event,
                     JSONObject().put("room", username)
                         .put("message", "$username is receiving the call"),
                     Ack {

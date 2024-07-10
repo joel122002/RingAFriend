@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import com.play.ringafriend.helpers.SocketEvent
 import com.play.ringafriend.network.SocketClient
 import com.play.ringafriend.ui.theme.RingAFriendTheme
 import io.socket.client.Ack
@@ -95,8 +96,8 @@ class RingerActivity : ComponentActivity() {
                             currentAudioVolume,
                             0
                         )
-                        socket.emit("completion", JSONObject().put("room", username).put("message", "Call ended"), Ack {
-                            socket.emit("leave", username, Ack {
+                        socket.emit(SocketEvent.COMPLETION.event, JSONObject().put("room", username).put("message", "Call ended"), Ack {
+                            socket.emit(SocketEvent.LEAVE.event, username, Ack {
                                 socket.disconnect()
                                 finish()
                             })

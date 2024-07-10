@@ -64,6 +64,7 @@ import java.net.URLEncoder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.play.ringafriend.data.UserModel
+import com.play.ringafriend.helpers.SocketEvent
 import com.play.ringafriend.network.SocketClient
 import io.socket.client.Ack
 import io.socket.client.Socket
@@ -227,23 +228,23 @@ fun UserCard(user: UserModel, context: Context, vm: HomeViewModel, socket: Socke
             if (!socket.connected()) {
                 socket.connect()
             }
-            socket.off("completion")
-            socket.off("messageToGroup")
-            socket.emit("join", user.username, Ack { args ->
+            socket.off(SocketEvent.COMPLETION.event)
+            socket.off(SocketEvent.MESSAGE_TO_GROUP.event)
+            socket.emit(SocketEvent.JOIN.event, user.username, Ack { args ->
                 Log.i(TAG, "Successfully joined ${user.username}")
             })
-            socket.on("messageToGroup") { args ->
+            socket.on(SocketEvent.MESSAGE_TO_GROUP.event) { args ->
                 val message = args[0] as String
                 cardColor = onSuccessCardColor
                 context.runOnUiThread(Runnable {
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 })
 
-                socket.on("completion") { args ->
+                socket.on(SocketEvent.COMPLETION.event) { args ->
                     val message = args[0] as String
                     cardColor = originalColor
-                    socket.off("completion")
-                    socket.off("messageToGroup")
+                    socket.off(SocketEvent.COMPLETION.event)
+                    socket.off(SocketEvent.MESSAGE_TO_GROUP.event)
                     context.runOnUiThread(Runnable {
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     })
@@ -303,7 +304,6 @@ fun SmallTopAppBarExample(displayToken: String, content: @Composable() (PaddingV
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                Log.d(TAG, "Clicked")
                 val packageManager: PackageManager = context.getPackageManager()
                 val i = Intent(Intent.ACTION_VIEW)
                 try {
