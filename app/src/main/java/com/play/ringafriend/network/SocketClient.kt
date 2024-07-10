@@ -26,7 +26,8 @@ class SocketClient(val context: Context) {
             val options = IO.Options()
             options.webSocketFactory = okHttpClient
             options.callFactory = okHttpClient
-            socket = IO.socket(BuildConfig.BACKEND_URL, options)
+            options.path = BuildConfig.BACKEND_SOCKET_PATH
+            socket = IO.socket(BuildConfig.BACKEND_SOCKET_URL, options)
             return socket
         }
     }
