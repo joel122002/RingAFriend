@@ -51,17 +51,22 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             val socket = SocketClient.getClient(applicationContext)
             socket.connect()
             socket.emit("join", username, Ack {
-                socket.emit("messageToGroup", JSONObject().put("room", username).put("message", "$username is receiving the call"), Ack {
-                   Log.i(TAG, "Call received")
-                })
+                socket.emit(
+                    "messageToGroup",
+                    JSONObject().put("room", username)
+                        .put("message", "$username is receiving the call"),
+                    Ack {
+                        Log.i(TAG, "Call received")
+                        val intent = Intent(applicationContext, RingerActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        intent.putExtra("USERNAME", username);
+                        startActivity(intent)
+                    })
             })
-            val intent = Intent(applicationContext, RingerActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            intent.putExtra("USERNAME", username);
-            startActivity(intent)
+
         }
 
         // Check if message contains a notification payload.
