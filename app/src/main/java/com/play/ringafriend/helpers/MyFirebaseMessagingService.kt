@@ -41,13 +41,14 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: ${remoteMessage.data}")
             val username = remoteMessage.data.get("username")
+            val userMessage = remoteMessage.data.get("message")
             val socket = SocketClient.getClient(applicationContext)
             socket.connect()
             socket.emit("join", username, Ack {
                 socket.emit(
                     SocketEvent.MESSAGE_TO_GROUP.event,
                     JSONObject().put("room", username)
-                        .put("message", "$username is receiving the call"),
+                        .put("message", "$username's phone is now ringing"),
                     Ack {
                         Log.i(TAG, "Call received")
                         val intent = Intent(applicationContext, RingerActivity::class.java)
@@ -56,6 +57,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         intent.putExtra("USERNAME", username);
+                        intent.putExtra("USER_MESSAGE", userMessage);
                         startActivity(intent)
                     })
             })

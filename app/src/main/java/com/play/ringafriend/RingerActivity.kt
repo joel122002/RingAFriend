@@ -10,17 +10,21 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
 import com.play.ringafriend.helpers.SocketEvent
 import com.play.ringafriend.network.SocketClient
 import com.play.ringafriend.ui.theme.RingAFriendTheme
@@ -49,6 +53,8 @@ class RingerActivity : ComponentActivity() {
             )
         }
         val username = getIntent().getStringExtra("USERNAME");
+        var userMessage = getIntent().getStringExtra("USER_MESSAGE");
+        userMessage = userMessage ?: ""
         val socket = SocketClient.getClient(applicationContext)
         setContent {
             var mediaPlayer = MediaPlayer.create(applicationContext, R.raw.alarm)
@@ -82,29 +88,33 @@ class RingerActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    IconButton(onClick = {
-                        try {
-                            mediaPlayer.stop()
-                            mediaPlayer.reset()
-                            mediaPlayer.release()
-                        } catch (e: Error) {
-                            e.printStackTrace()
-                        }
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text(text = userMessage)
+                        IconButton(onClick = {
+                            try {
+                                mediaPlayer.stop()
+                                mediaPlayer.reset()
+                                mediaPlayer.release()
+                            } catch (e: Error) {
+                                e.printStackTrace()
+                            }
 
-                        audioManager.setStreamVolume(
-                            AudioManager.STREAM_MUSIC,
-                            currentAudioVolume,
-                            0
-                        )
-                        socket.emit(SocketEvent.COMPLETION.event, JSONObject().put("room", username).put("message", "Call ended"), Ack {
-                            socket.emit(SocketEvent.LEAVE.event, username, Ack {
-                                socket.disconnect()
-                                finish()
+                            audioManager.setStreamVolume(
+                                AudioManager.STREAM_MUSIC,
+                                currentAudioVolume,
+                                0
+                            )
+                            socket.emit(SocketEvent.COMPLETION.event, JSONObject().put("room", username).put("message", "${username} dismissed the ring"), Ack {
+                                socket.emit(SocketEvent.LEAVE.event, username, Ack {
+                                    socket.disconnect()
+                                    finish()
+                                })
                             })
-                        })
-                    }) {
-                        Icon(Icons.Filled.Close, contentDescription = "Dismiss")
+                        }, modifier = Modifier.weight(1f)) {
+                            Icon(Icons.Filled.Close, contentDescription = "Dismiss")
+                        }
                     }
+                    
                 }
             }
         }
