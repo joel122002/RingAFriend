@@ -28,7 +28,8 @@
             android:exported="false"
             android:label="@string/title_activity_ringer"
             android:theme="@style/Theme.RingAFriend"
-            android:launchMode="singleInstance"/>
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
