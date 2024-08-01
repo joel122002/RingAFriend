@@ -1,20 +1,14 @@
-package com.play.ringafriend
+package com.play.ringafriend.ui.sceens
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
-import android.os.PowerManager
-import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,170 +35,134 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
+import com.play.ringafriend.BuildConfig
 import com.play.ringafriend.auth.CredentialsActivity
 import com.play.ringafriend.data.RegisterDevicePostModel
+import com.play.ringafriend.data.RingModel
+import com.play.ringafriend.data.UserModel
 import com.play.ringafriend.helpers.AppState
 import com.play.ringafriend.helpers.AppStateManager
-import com.play.ringafriend.ui.theme.RingAFriendTheme
-import com.play.ringafriend.viewmodel.HomeViewModel
-import java.net.URLEncoder
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import com.play.ringafriend.data.UserModel
 import com.play.ringafriend.helpers.SocketEvent
 import com.play.ringafriend.network.SocketClient
+import com.play.ringafriend.ui.theme.RingAFriendTheme
+import com.play.ringafriend.viewmodel.HomeViewModel
 import io.socket.client.Ack
 import io.socket.client.Socket
+import java.net.URLEncoder
 
-class MainActivity : ComponentActivity() {
-    private lateinit var vm: HomeViewModel
-    private lateinit var socket: Socket
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen(context: Context, application: Application, activity: MainActivity) {
+    val vm = viewModel{
+        HomeViewModel(application)
+    }
+    val socket = SocketClient.getClient(application.applicationContext)
+    var displayToken by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var users = vm.getAllUsersLiveData?.observeAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        vm = ViewModelProvider(this)[HomeViewModel::class.java]
-        socket = SocketClient.getClient(applicationContext)
-        val appState = AppStateManager.getAppState(applicationContext)
-        if (appState == AppState.LOGGED_OUT) {
-            val intent = Intent(applicationContext, CredentialsActivity::class.java)
-            startActivity(intent)
-            finish()
-            return
-        }
-        val applicationContext = applicationContext
-        // Handle permission intent
-        val startForResult =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val intent = result.data
-                    // Handle the Intent
-                    //do stuff here
-                }
+    val TAG = "FIREISCOOL"
+    LaunchedEffect(Unit) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
             }
-        // Request Draw over other apps permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + packageName)
-            )
-            startForResult.launch(intent)
-        }
-        // Check for battery optimization and disable it
-        val pm = this.getSystemService(POWER_SERVICE) as PowerManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !pm.isIgnoringBatteryOptimizations(
-                packageName
-            )
-        ) {
-            val intent = Intent()
-            val packageName = packageName
-            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-            intent.setData(Uri.parse("package:$packageName"))
-            startActivity(intent)
-        }
-        setContent {
-            var displayToken by remember { mutableStateOf("") }
-            var username by remember { mutableStateOf("") }
-            var users = vm.getAllUsersLiveData?.observeAsState()
 
-            val TAG = "FIREISCOOL"
-            FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    Log.w(TAG, "Fetching FCM registration token failed", task.exception)
-                    return@OnCompleteListener
-                }
-
-                // Get new FCM registration token
-                val token = task.result
-                displayToken = token
-                val registerDevicePostModel = RegisterDevicePostModel()
-                registerDevicePostModel.token = displayToken
-                registerDevicePostModel.device_name = Build.MANUFACTURER + " " + Build.MODEL
-                vm.registerDevice(registerDevicePostModel = registerDevicePostModel)
-                vm.registerDeviceLiveData?.observe(this, Observer {
-                    if (!it.token.isNullOrEmpty()) {
-                        Log.d(TAG, "registered")
-                    } else if (!it.error.isNullOrEmpty()) {
-                        Toast.makeText(baseContext, it.error!!, Toast.LENGTH_SHORT).show()
-                    }
-                })
-
-                Log.i(TAG, token)
-            })
-            vm.profile()
-            vm.profileLiveData?.observe(this, Observer {
-                if (it != null && !it.username.isNullOrEmpty()) {
-                    username = it.username
-                } else if (it != null && !it.error.isNullOrEmpty()) {
-                    if (it.error == "Unauthorized") {
-                        AppStateManager.setAppState(applicationContext, AppState.LOGGED_OUT)
-                        val intent = Intent(applicationContext, CredentialsActivity::class.java)
-                        startActivity(intent)
-                        finish()
-                    }
-                    Toast.makeText(baseContext, it.error!!, Toast.LENGTH_SHORT).show()
+            // Get new FCM registration token
+            val token = task.result
+            displayToken = token
+            val registerDevicePostModel = RegisterDevicePostModel()
+            registerDevicePostModel.token = displayToken
+            registerDevicePostModel.device_name = Build.MANUFACTURER + " " + Build.MODEL
+            vm.registerDevice(registerDevicePostModel = registerDevicePostModel)
+            vm.registerDeviceLiveData?.observe(lifecycleOwner, Observer {
+                if (!it.token.isNullOrEmpty()) {
+                    Log.d(TAG, "registered")
+                } else if (!it.error.isNullOrEmpty()) {
+                    Toast.makeText(context, it.error!!, Toast.LENGTH_SHORT).show()
                 }
             })
-            vm.getAllUsers()
 
-            if (username.isNotEmpty()) {
-                FirebaseMessaging.getInstance().subscribeToTopic(username)
-                    .addOnCompleteListener { task ->
-                        var msg = "Subscribed"
-                        if (!task.isSuccessful) {
-                            msg = "Subscribe failed"
-                        }
-                        Log.d(TAG, msg)
-                    }
-            }
-
-            RingAFriendTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    SmallTopAppBarExample(displayToken = displayToken) { innerPadding ->
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier.padding(innerPadding),
-                            contentPadding = PaddingValues(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            if (users?.value != null) {
-                                items(users.value!!) { user ->
-                                    UserCard(
-                                        user = user,
-                                        context = this@MainActivity,
-                                        vm = vm,
-                                        socket = socket
-                                    )
-                                }
-                            }
-                        }
-                    }
+            Log.i(TAG, token)
+        })
+        vm.profile()
+        vm.profileLiveData?.observe(lifecycleOwner, Observer {
+            if (it != null && !it.username.isNullOrEmpty()) {
+                username = it.username
+            } else if (it != null && !it.error.isNullOrEmpty()) {
+                if (it.error == "Unauthorized") {
+                    AppStateManager.setAppState(context, AppState.LOGGED_OUT)
+                    val intent = Intent(context, CredentialsActivity::class.java)
+                    startActivity(context, intent, null)
+                    activity.finish()
                 }
+                Toast.makeText(context, it.error!!, Toast.LENGTH_SHORT).show()
             }
+        })
+        vm.getAllUsers()
+    }
+
+    LaunchedEffect(username) {
+        if (username.isNotEmpty()) {
+            FirebaseMessaging.getInstance().subscribeToTopic(username)
+                .addOnCompleteListener { task ->
+                    var msg = "Subscribed"
+                    if (!task.isSuccessful) {
+                        msg = "Subscribe failed"
+                    }
+                    Log.d(TAG, msg)
+                }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        socket.disconnect()
+
+
+    RingAFriendTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            SmallTopAppBarExample(displayToken = displayToken) { innerPadding ->
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.padding(innerPadding),
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (users?.value != null) {
+                        items(users.value!!) { user ->
+                            UserCard(
+                                user = user,
+                                context = context,
+                                vm = vm,
+                                socket = socket
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -253,7 +211,7 @@ fun UserCard(user: UserModel, context: Context, vm: HomeViewModel, socket: Socke
                     })
                 }
             }
-            vm.sendToUser(user.username!!)
+            vm.sendToUser(user.username!!, RingModel())
             vm.sendToUserLiveData?.observe(
                 lifecycleOwner.value,
                 Observer {
@@ -327,4 +285,3 @@ fun SmallTopAppBarExample(displayToken: String, content: @Composable() (PaddingV
         content(innerPadding)
     }
 }
-

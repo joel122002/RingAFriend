@@ -4,7 +4,7 @@ import android.content.Intent
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.play.ringafriend.RingerActivity
+import com.play.ringafriend.ui.sceens.RingerActivity
 import com.play.ringafriend.network.SocketClient
 import io.socket.client.Ack
 import org.json.JSONObject
