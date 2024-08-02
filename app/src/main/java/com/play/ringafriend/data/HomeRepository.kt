@@ -131,10 +131,10 @@ class HomeRepository(context: Context) {
         return data
     }
 
-    fun sendToUser(username: String): LiveData<String> {
+    fun sendToUser(username: String, ringModel: RingModel): LiveData<String> {
         var data = MutableLiveData<String>()
 
-        apiInterface?.sendToUser(username)?.enqueue(object : Callback<String>{
+        apiInterface?.sendToUser(username, ringModel)?.enqueue(object : Callback<String>{
             override fun onFailure(call: Call<String>, t: Throwable) {
                 data.value = "Request failed"
             }

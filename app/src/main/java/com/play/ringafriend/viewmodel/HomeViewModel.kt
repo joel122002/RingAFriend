@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import com.play.ringafriend.data.AuthModel
 import com.play.ringafriend.data.HomeRepository
 import com.play.ringafriend.data.RegisterDevicePostModel
+import com.play.ringafriend.data.RingModel
 import com.play.ringafriend.data.UserModel
 
 class HomeViewModel(application: Application): AndroidViewModel(application){
@@ -44,7 +45,7 @@ class HomeViewModel(application: Application): AndroidViewModel(application){
         getAllUsersLiveData = homeRepository?.getAllUsers()
     }
 
-    fun sendToUser(username: String){
-        sendToUserLiveData = homeRepository?.sendToUser(username)
+    fun sendToUser(username: String, ringModel: RingModel){
+        sendToUserLiveData = homeRepository?.sendToUser(username, ringModel)
     }
 }

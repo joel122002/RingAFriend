@@ -2,6 +2,7 @@ package com.play.ringafriend.network
 
 import com.play.ringafriend.data.AuthModel
 import com.play.ringafriend.data.RegisterDevicePostModel
+import com.play.ringafriend.data.RingModel
 import com.play.ringafriend.data.UserModel
 import retrofit2.Call
 import retrofit2.http.Body
@@ -25,7 +26,7 @@ interface ApiInterface {
     @GET("get-all-users")
     fun getAllUsers(): Call<List<UserModel>>
 
-    @GET("send-to-user/{username}")
-    fun sendToUser(@Path(value = "username", encoded = true) username: String): Call<String>
+    @POST("send-to-user/{username}")
+    fun sendToUser(@Path(value = "username", encoded = true) username: String, @Body ringModel: RingModel): Call<String>
 
 }

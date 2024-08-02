@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Send
@@ -29,9 +31,11 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -70,15 +75,14 @@ import java.net.URLEncoder
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(context: Context, application: Application, activity: MainActivity) {
-    val vm = viewModel{
+    val vm = viewModel {
         HomeViewModel(application)
     }
     val socket = SocketClient.getClient(application.applicationContext)
     var displayToken by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
-    var users = vm.getAllUsersLiveData?.observeAsState()
+    val users = vm.getAllUsersLiveData?.observeAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
-
     val TAG = "FIREISCOOL"
     LaunchedEffect(Unit) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -161,6 +165,56 @@ fun MainScreen(context: Context, application: Application, activity: MainActivit
                         }
                     }
                 }
+
+            }
+        }
+    }
+}
+
+@Composable
+fun MessageDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: (message: String) -> Unit,
+) {
+    var message by remember {
+        mutableStateOf("")
+    }
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        // Draw a rectangle shape with rounded corners inside the dialog
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth().padding(16.dp, 16.dp, 16.dp, 0.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Text(text = "Message", modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp), style = MaterialTheme.typography.bodyLarge)
+                OutlinedTextField(value = message, onValueChange = { message = it }, label = {
+                    Text(text = "Message")
+                })
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = { onDismissRequest() },
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Text("Dismiss")
+                    }
+                    TextButton(
+                        onClick = { onConfirmation(message) },
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Text("Confirm")
+                    }
+                }
             }
         }
     }
@@ -174,6 +228,10 @@ fun UserCard(user: UserModel, context: Context, vm: HomeViewModel, socket: Socke
     val originalColor = MaterialTheme.colorScheme.surfaceVariant
     val lifecycleOwner = rememberUpdatedState(LocalLifecycleOwner.current)
     var cardColor by remember { mutableStateOf(originalColor) }
+    var selectedUsername by remember {
+        mutableStateOf<String?>(null)
+    }
+
 
     Card(
         colors = CardDefaults.cardColors(
@@ -183,6 +241,20 @@ fun UserCard(user: UserModel, context: Context, vm: HomeViewModel, socket: Socke
             .fillMaxWidth(0.5f)
             .height(80.dp),
         onClick = {
+            selectedUsername = user.username
+        }
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Text(text = "${user.username}")
+        }
+
+    }
+    if (selectedUsername != null) {
+        MessageDialog(onDismissRequest = { selectedUsername = null }, onConfirmation = { message ->
             if (!socket.connected()) {
                 socket.connect()
             }
@@ -211,7 +283,7 @@ fun UserCard(user: UserModel, context: Context, vm: HomeViewModel, socket: Socke
                     })
                 }
             }
-            vm.sendToUser(user.username!!, RingModel())
+            vm.sendToUser(user.username!!, RingModel(message))
             vm.sendToUserLiveData?.observe(
                 lifecycleOwner.value,
                 Observer {
@@ -223,16 +295,8 @@ fun UserCard(user: UserModel, context: Context, vm: HomeViewModel, socket: Socke
                         ).show()
                     }
                 })
-        }
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            Text(text = "${user.username}")
-        }
-
+            selectedUsername = null
+        })
     }
 }
 
