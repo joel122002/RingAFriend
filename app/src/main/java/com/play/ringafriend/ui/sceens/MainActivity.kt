@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.play.ringafriend.auth.CredentialsActivity
 import com.play.ringafriend.helpers.AppState
 import com.play.ringafriend.helpers.AppStateManager
+import com.play.ringafriend.network.SocketClient
 import io.socket.client.Socket
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        socket = SocketClient.getClient(applicationContext)
         val appState = AppStateManager.getAppState(applicationContext)
         if (appState == AppState.LOGGED_OUT) {
             val intent = Intent(applicationContext, CredentialsActivity::class.java)
