@@ -278,7 +278,7 @@ fun UserCard(user: UserModel, context: Context, vm: HomeViewModel, socket: Socke
                     context.runOnUiThread(Runnable {
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     })
-                    socket.emit("leave", user.username, Ack {
+                    socket.emit(SocketEvent.LEAVE.event, user.username, Ack {
                         socket.disconnect()
                     })
                 }

@@ -40,10 +40,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         // Request Draw over other apps permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+        if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + packageName)
+                Uri.parse("package:$packageName")
             )
             startForResult.launch(intent)
         }
