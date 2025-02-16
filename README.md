@@ -4,9 +4,10 @@ Ring A Friend is an app designed to call make a phone ring, even when it's on si
 
 ## Installation
 
-Ring A Friend requires [Android Studio](https://developer.android.com/studio) (I'm using Android Studio Hedgehog | 2023.1.1 Patch 1)
+Ring A Friend requires [Android Studio](https://developer.android.com/studio) (I'm using Android Studio Ladybug | 2024.2.1 Patch 2)
 
-You will also have to add [google-services.json](https://developers.google.com/android/guides/google-services-plugin#adding_the_json_file) to the app
+You will also have to add [google-services.json](https://developers.google.com/android/guides/google-services-plugin#adding_the_json_file) to the app.
+*Note: before generating the `google-services.json` file you must generate the admin sdk json for [RingAFriendBackend](https://github.com/joel122002/RingAFriendBackend)*
 
 Add the following properties to the `local.properties`
 ```bash
