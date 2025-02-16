@@ -90,7 +90,7 @@ class HomeRepository(context: Context) {
     }
 
     fun profile(): LiveData<UserModel> {
-        var data = MutableLiveData<UserModel>()
+        var data: MutableLiveData<UserModel> = MutableLiveData()
 
         apiInterface?.profile()?.enqueue(object : Callback<UserModel>{
             override fun onFailure(call: Call<UserModel>, t: Throwable) {
@@ -111,7 +111,7 @@ class HomeRepository(context: Context) {
     }
 
     fun getAllUsers(): LiveData<List<UserModel>> {
-        var data = MutableLiveData<List<UserModel>>()
+        var data: MutableLiveData<List<UserModel>> = MutableLiveData()
 
         apiInterface?.getAllUsers()?.enqueue(object : Callback<List<UserModel>>{
             override fun onFailure(call: Call<List<UserModel>>, t: Throwable) {
@@ -132,7 +132,7 @@ class HomeRepository(context: Context) {
     }
 
     fun sendToUser(username: String, ringModel: RingModel): LiveData<String> {
-        var data = MutableLiveData<String>()
+        var data: MutableLiveData<String> = MutableLiveData()
 
         apiInterface?.sendToUser(username, ringModel)?.enqueue(object : Callback<String>{
             override fun onFailure(call: Call<String>, t: Throwable) {
